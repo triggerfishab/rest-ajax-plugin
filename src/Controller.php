@@ -204,7 +204,10 @@ class Controller
 
         if (! is_subclass_of(self::getActionClass($action), 'Triggerfish\REST_Ajax\AbstractAjaxHandler')) {
             trigger_error(
-                sprintf('%s must extend class Triggerfish\REST_Ajax\AbstractAjaxHandler.', self::getActionClass($action)),
+                sprintf(
+                    '%s must extend class Triggerfish\REST_Ajax\AbstractAjaxHandler.',
+                    self::getActionClass($action)
+                ),
                 E_USER_ERROR
             );
         }
