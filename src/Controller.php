@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Triggerfish\Ajax;
+namespace Triggerfish\REST_Ajax;
 
 use WP_REST_Server;
 use WP_REST_Request;
@@ -52,7 +52,7 @@ use function App\locate_template;
  *    The data from 1 or 2 will be injected as the template will be included with the App\template function.
  */
 
-class Ajax
+class Controller
 {
     const REST_NAMESPACE = 'theme/v1';
     const REST_ROUTE = 'ajax';
@@ -202,9 +202,9 @@ class Ajax
             return false;
         }
 
-        if (! is_subclass_of(self::getActionClass($action), 'Triggerfish\Ajax\AbstractAjaxHandler')) {
+        if (! is_subclass_of(self::getActionClass($action), 'Triggerfish\REST_Ajax\AbstractAjaxHandler')) {
             trigger_error(
-                sprintf('%s must extend class Triggerfish\Ajax\AbstractAjaxHandler.', self::getActionClass($action)),
+                sprintf('%s must extend class Triggerfish\REST_Ajax\AbstractAjaxHandler.', self::getActionClass($action)),
                 E_USER_ERROR
             );
         }

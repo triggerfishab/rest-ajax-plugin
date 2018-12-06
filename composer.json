@@ -1,5 +1,5 @@
 {
-  "name": "triggerfish/ajax",
+  "name": "triggerfish/rest-ajax",
   "type": "wordpress-plugin",
   "license": "MIT",
   "homepage": "https://www.triggerfish.se",
@@ -15,7 +15,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "Triggerfish\\Ajax\\": "src/"
+      "Triggerfish\\REST_Ajax\\": "src/"
     }
   },
   "require": {

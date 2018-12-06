@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Triggerfish\Ajax;
+namespace Triggerfish\REST_Ajax;
 
 interface AjaxHandlerInterface
 {
