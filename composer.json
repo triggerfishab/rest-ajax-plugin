@@ -1,6 +1,6 @@
 {
   "name": "triggerfish/rest-ajax",
-  "type": "wordpress-plugin",
+  "type": "wordpress-muplugin",
   "license": "MIT",
   "homepage": "https://www.triggerfish.se",
   "authors": [
