@@ -12,7 +12,7 @@ The class of a class based handler _must_ extend the abstract `Triggerfish\REST_
 
 ## More in-depth information
 
-Actions and handlers does not need to be registered like tf_add_ajax_handler or add_action('wp_ajax_XXX').
+Actions and handlers does not need to be registered like `tf_add_ajax_handler` or `add_action('wp_ajax_XXX')`.
 The request is automatically mapped to a class or a method, specific to the current action.
 All is mapped by the action sent in the request.
 Automatic templating can be achieved.
