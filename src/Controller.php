@@ -35,17 +35,17 @@ use function App\locate_template;
  *
  * 1. A class named like the action in StudlyCase will be searched in the following namespace, App\AjaxHandler.
  *    If such a class is found and has a public method named "__getData", the flow will jump to 3.
- *    This is what is called "class based" action below.
+ *    This is what is called "class based" handler below.
  *
  * 2. If a class cannot be found by 1, the fallback will be searched for.
  *    The fallback is a public static method named like the action in camelCase in App\AjaxHandler\DefaultHandler.
- *    This is what is called "method based" action below.
+ *    This is what is called "method based" handler below.
  *
  * 3. Automatic templating.
  *    If the data from 1 or 2 is an array, a template named like the action in kebab-case will be searched for
  *    in a directory called "ajax" in the views directory.
  *
- *    But if the action is "class based", the class can define a public method named "__template"
+ *    But if the handler is "class based", the class can define a public method named "__template"
  *    that return the preferred template's path.
  *    This will take precedence over, and fall back to, the template in the "ajax" directory from above.
  *
