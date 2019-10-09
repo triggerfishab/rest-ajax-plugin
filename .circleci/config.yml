@@ -26,7 +26,7 @@ jobs:
             rm -rf .git
             FILENAME=rest-ajax.$GIT_TAG.zip
             zip -r $FILENAME .
-            rsync -avz --delete --port=$SSH_PORT -e "ssh -p $SSH_PORT -o StrictHostKeyChecking=no" $FILENAME $SSH_USER@$SSH_IP:~/public/release-belt/releases/wordpress-plugin/triggerfish/
+            rsync -avz --delete --port=$SSH_PORT -e "ssh -p $SSH_PORT -o StrictHostKeyChecking=no" $FILENAME $SSH_USER@$SSH_IP:~/public/release-belt/releases/wordpress-muplugin/triggerfish/
 
 workflows:
   version: 2
