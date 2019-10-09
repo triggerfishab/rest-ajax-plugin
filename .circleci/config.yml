@@ -21,7 +21,7 @@ jobs:
           command: echo "export GIT_TAG=$(git tag -l | tail -n 1)" >> $BASH_ENV
 
       - run:
-          name: Deploy with SCP to Kinsta
+          name: Upload to Release Belt
           command: |
             rm -rf .git
             FILENAME=rest-ajax.$GIT_TAG.zip
