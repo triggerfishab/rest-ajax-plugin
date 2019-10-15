@@ -96,7 +96,8 @@ class Controller
 
         // Fix to set the current language in Polylang.
         if (function_exists('PLL') && class_exists('PLL_Choose_Lang_Url')) {
-            $choose_lang = new \PLL_Choose_Lang_Url(PLL());
+            $pll = PLL();
+            $choose_lang = new \PLL_Choose_Lang_Url($pll);
             $lang = $choose_lang->get_preferred_language();
 
             if (pll_current_language() != $lang) {
