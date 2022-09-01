@@ -110,7 +110,7 @@ class Controller
         do_action('tf/ajax/before/action=' . $this->action, $this->action);
 
 
-        $result = $this->getHandlerData($this->action);
+        $result = $this->getHandlerData($this->action, $this->request->get_params());
 
         if (is_array($result) || (is_object($result) && $result instanceof ArrayAccess)) {
             $template = $this->getTemplate();
@@ -232,7 +232,6 @@ class Controller
     protected static function hasCallableHandler(string $action, WP_REST_Request $request): bool
     {
 
-
         if (self::hasClassBasedHandler($action, $request)) {
             return true;
         }
@@ -240,7 +239,6 @@ class Controller
         if (self::hasMethodBasedHandler($action)) {
             return true;
         }
-
 
         return false;
     }
