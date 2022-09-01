@@ -75,8 +75,8 @@ class Controller
                     'action' => [
                         'type' => 'string',
                         'required' => true,
-                        'validate_callback' => function ($action) {
-                            return self::hasCallableHandler($action);
+                        'validate_callback' => function ($action, $request) {
+                            return self::hasCallableHandler($action, $request);
                         },
                     ],
                 ],
@@ -109,7 +109,8 @@ class Controller
         do_action('tf/ajax/before', $this->action, $this->request);
         do_action('tf/ajax/before/action=' . $this->action, $this->action);
 
-        $result = $this->getHandlerData($this->action, $this->request->get_params());
+
+        $result = $this->getHandlerData($this->action);
 
         if (is_array($result) || (is_object($result) && $result instanceof ArrayAccess)) {
             $template = $this->getTemplate();
@@ -160,7 +161,7 @@ class Controller
 
         // If the ajax action is "class based"
         // the class can have a public method named __template with the path to the template for that action.
-        if (self::hasClassBasedHandler($this->action)) {
+        if (self::hasClassBasedHandler($this->action, $this->request)) {
             $template_path = $this->getActionClassInstance()->__template();
 
             $template_paths->push($template_path);
@@ -197,9 +198,15 @@ class Controller
         return camel_case($action);
     }
 
-    protected static function hasClassBasedHandler(string $action): bool
+    protected static function hasClassBasedHandler(string $action, WP_REST_Request $request): bool
     {
-        if (! is_callable([self::getActionClass($action), self::getActionClassMethod()])) {
+
+        $className = self::getActionClass($action);
+        if (!class_exists($className)) {
+            return false;
+        }
+
+        if (! is_callable([new $className($request), self::getActionClassMethod()])) {
             return false;
         }
 
@@ -213,6 +220,7 @@ class Controller
             );
         }
 
+
         return true;
     }
 
@@ -221,9 +229,11 @@ class Controller
         return is_callable([self::getAjaxClass(), self::getAjaxClassMethod($action)]);
     }
 
-    protected static function hasCallableHandler(string $action): bool
+    protected static function hasCallableHandler(string $action, WP_REST_Request $request): bool
     {
-        if (self::hasClassBasedHandler($action)) {
+
+
+        if (self::hasClassBasedHandler($action, $request)) {
             return true;
         }
 
@@ -231,12 +241,14 @@ class Controller
             return true;
         }
 
+
         return false;
     }
 
     protected function getCallabeHandler(): ?callable
     {
-        if (self::hasClassBasedHandler($this->action)) {
+
+        if (self::hasClassBasedHandler($this->action, $this->request)) {
             return [$this->getActionClassInstance(), self::getActionClassMethod()];
         }
 
@@ -249,7 +261,8 @@ class Controller
 
     protected function getActionClassInstance() : ?AbstractAjaxHandler
     {
-        if (! self::hasClassBasedHandler($this->action)) {
+
+        if (! self::hasClassBasedHandler($this->action, $this->request)) {
             return null;
         }
 
