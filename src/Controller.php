@@ -199,7 +199,7 @@ class Controller
 
     protected static function hasClassBasedHandler(string $action): bool
     {
-        if (! is_callable([self::getActionClass($action), self::getActionClassMethod()])) {
+        if (!method_exists(self::getActionClass($action), self::getActionClassMethod())) {
             return false;
         }
 
