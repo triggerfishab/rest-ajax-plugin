@@ -7,6 +7,7 @@ use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use function App\template;
 use function App\locate_template;
 
@@ -152,7 +153,7 @@ class Controller
 
     protected function getTemplate() : string
     {
-        $action_kebab_case = kebab_case(camel_case($this->action));
+        $action_kebab_case = Str::kebab(Str::camel($this->action));
 
         // Default template path is always ajax/ followed by the action in kebab case.
         // If the action is "class based" this path will be considered the fallback path
@@ -180,7 +181,7 @@ class Controller
 
     protected static function getActionClass(string $action): string
     {
-        return '\App\AjaxHandler\\' . studly_case($action);
+        return '\App\AjaxHandler\\' . Str::studly($action);
     }
 
     protected static function getActionClassMethod(): string
@@ -195,7 +196,7 @@ class Controller
 
     protected static function getAjaxClassMethod(string $action): string
     {
-        return camel_case($action);
+        return Str::camel($action);
     }
 
     protected static function hasClassBasedHandler(string $action, WP_REST_Request $request): bool
