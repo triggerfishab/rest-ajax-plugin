@@ -127,7 +127,7 @@ class Controller
         do_action('tf/ajax/after', $this->action, $result, $this->request);
         do_action('tf/ajax/after/action=' . $this->action, $this->action, $result, $this->request);
 
-        return $result;
+        return rest_ensure_response($result);
     }
 
     public static function getURL() : string
@@ -176,7 +176,7 @@ class Controller
             $this->request
         );
 
-        return locate_template($template_paths->filter());
+        return locate_template($template_paths->filter()->toArray());
     }
 
     protected static function getActionClass(string $action): string
