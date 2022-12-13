@@ -81,6 +81,7 @@ class Controller
                         },
                     ],
                 ],
+                'permission_callback' => '__return_true',
             ]
         );
     }
