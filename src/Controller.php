@@ -59,6 +59,7 @@ class Controller
     const REST_ROUTE = 'ajax';
 
     protected $request;
+    protected $action;
 
     public static function registerRESTRoute()
     {
