@@ -1,6 +1,113 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "labels": [
+    "dependencies"
+  ],
+  "baseBranches": [
+    "master"
+  ],
+  "commitMessageAction": "⬆️ Bump",
   "extends": [
-    "config:recommended"
-  ]
+    "config:best-practices",
+    "schedule:weekly",
+    ":dependencyDashboard"
+  ],
+  "commitMessageTopic": "{{depName}}",
+  "forkProcessing": "enabled",
+  "prConcurrentLimit": 1,
+  "rebaseWhen": "never",
+  "packageRules": [
+    {
+      "matchCategories": [
+        "php"
+      ],
+      "addLabels": [
+        "php"
+      ]
+    },
+    {
+      "matchCategories": [
+        "js"
+      ],
+      "addLabels": [
+        "javascript"
+      ]
+    },
+    {
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch",
+        "pin"
+      ]
+    },
+    {
+      "groupName": "Bud",
+      "matchPackagePrefixes": [
+        "@roots/"
+      ],
+      "schedule": [
+        "at any time"
+      ]
+    },
+    {
+      "groupName": "Alpine.js",
+      "matchPackagePrefixes": [
+        "alpinejs",
+        "@alpinejs/"
+      ]
+    },
+    {
+      "matchManagers": [
+        "npm"
+      ],
+      "addLabels": [
+        "npm"
+      ]
+    },
+    {
+      "matchManagers": [
+        "composer"
+      ],
+      "addLabels": [
+        "composer"
+      ],
+      "rangeStrategy": "bump"
+    },
+    {
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "addLabels": [
+        "major"
+      ]
+    },
+    {
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "addLabels": [
+        "minor"
+      ]
+    },
+    {
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "addLabels": [
+        "patch"
+      ]
+    }
+  ],
+  "hostRules": [
+    {
+      "matchHost": "composer.triggerfish.cloud",
+      "hostType": "packagist",
+      "username": "composer",
+      "encrypted": {
+        "password": "wcFMA/xDdHCJBTolAQ/8CFd+iAyyaq6ye4lRKghveT2zIVIr0rD5RtWJbntnJIOWAAicS2cU6I6iNYWA49OJyKr6QsAelbCdHLjBKo3tGxaZmq9t5b7uOSRXzP+XHwnkXjlbpMPVIwX5kBr4sTmu6P/7tum7+FFi2xr6WHzFkl0qXDD+asRHo0xlDLfyANIetp/VePxSkd9MOBclTKfEC6y73ORpFMjCylncu/umJz3loqPoe2W6x/UC6nF0y3XeiD8Gtpg76Cs4jSuNuXcJe3ireRt0uuysgAgKZXYKT6Fyxc3epEKsEPIQ/8KdekFfG/Fn30Fx9UwM7SOVz0UTeweFm43FcLeVpSFkyTW1RIj85AnUR4SEk0WLjuRjsG1AUIcHd1S5T+9JtWy4ifFat+Paka8hynfqHh2DlroMbas1wr4JemEEXnQAc6YVbwXzw49rwtn6Bq5oTXPDABmkNAkEj1Z9AR9EhHJs7FJNk1MxgboOv8puiWSwb9JWrC/GMig1FyW9bdVn4tTqoSvrCz1siV2VRtvWY5I0MevX3AMTAj6k5jYIvtVyoHnhDGLBWHqhW0fqYEmHqzq15FBg1fE0rX7pzvWBo/rs5l1YZP5ufgPuuR/ySln5BeBCLuiL/L4R8D9o8YCqgTnGgeZYnkIaJqsNpU7LbPkABpgVb3vGgxwF955Wf2YFOdmNq5fSaAEmDicaR/xpajmvKZsG9pP1PMdjBppZETxq4pj5j1YsX/DTESCbLzIkVI35UdJm7TfvClq7sYT62QX2mY3spGNgMQfF8b/Ksb5psFILIwSGgWpBwL+XnybF+hQgjTlh1gKwHlQGvw8Q"
+      }
+    }
+  ],
+  "timezone": "Europe/Stockholm"
 }
