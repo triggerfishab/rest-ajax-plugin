@@ -7,7 +7,7 @@ jobs:
   deploy:
     docker:
       # specify the version you desire here
-      - image: circleci/node:lts
+      - image: circleci/node:lts@sha256:1803e9ed7deec9456ad2609124b7333d40b2eec0cf34998ae766cbf90c9a3625
 
     working_directory: ~/repo
 
