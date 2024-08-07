@@ -43,18 +43,18 @@
     },
     {
       "groupName": "Bud",
-      "matchPackagePrefixes": [
-        "@roots/"
-      ],
       "schedule": [
         "at any time"
+      ],
+      "matchPackageNames": [
+        "@roots/{/,}**"
       ]
     },
     {
       "groupName": "Alpine.js",
-      "matchPackagePrefixes": [
-        "alpinejs",
-        "@alpinejs/"
+      "matchPackageNames": [
+        "alpinejs{/,}**",
+        "@alpinejs/{/,}**"
       ]
     },
     {
