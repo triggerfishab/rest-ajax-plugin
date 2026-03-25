@@ -361,7 +361,7 @@ class Controller
         return false;
     }
 
-    protected function getCallabeHandler(): ?callable
+    protected function getCallableHandler(): ?callable
     {
 
         if (self::hasClassBasedHandler($this->action, $this->request)) {
@@ -395,7 +395,7 @@ class Controller
 
     protected function getHandlerData(string $action)
     {
-        $handler = $this->getCallabeHandler();
+        $handler = $this->getCallableHandler();
         if ($handler === null) {
             return new WP_Error(
                 'no_handler',
