@@ -71,14 +71,31 @@ class Controller
                 'callback' => function (WP_REST_Request $request) {
                     $instance = new self($request);
 
-                    return $instance->handleRequest();
+                    return $instance->dispatchRequest();
                 },
                 'args' => [
                     'action' => [
                         'type' => 'string',
                         'required' => true,
                         'validate_callback' => function ($action, $request) {
-                            return self::hasCallableHandler($action, $request);
+                            try {
+                                return self::hasCallableHandler($action, $request);
+                            } catch (\Throwable $e) {
+                                error_log(
+                                    sprintf(
+                                        'REST Ajax validate: %s in %s:%d',
+                                        $e->getMessage(),
+                                        $e->getFile(),
+                                        $e->getLine()
+                                    )
+                                );
+
+                                return new WP_Error(
+                                    'rest_ajax_validate',
+                                    (defined('WP_DEBUG') && WP_DEBUG) ? $e->getMessage() : 'Validation failed.',
+                                    ['status' => 500]
+                                );
+                            }
                         },
                     ],
                 ],
@@ -93,21 +110,93 @@ class Controller
         $this->action = $this->request->get_param('action');
     }
 
+    protected function dispatchRequest()
+    {
+        try {
+            return $this->handleRequest();
+        } catch (\Throwable $e) {
+            error_log(
+                sprintf(
+                    'REST Ajax exception: %s in %s:%d',
+                    $e->getMessage(),
+                    $e->getFile(),
+                    $e->getLine()
+                )
+            );
+
+            return new WP_Error(
+                'rest_ajax_exception',
+                (defined('WP_DEBUG') && WP_DEBUG) ? $e->getMessage() : 'Request failed.',
+                ['status' => 500]
+            );
+        }
+    }
+
+    protected static function setPolylangCurlangFromModel(object $pll): void
+    {
+        if (! isset($pll->model) || ! is_object($pll->model)) {
+            return;
+        }
+
+        $model = $pll->model;
+        $lang = null;
+
+        if (method_exists($model, 'get_language_from_request')) {
+            $slug = $model->get_language_from_request();
+            if ($slug) {
+                $lang = $model->get_language($slug);
+            }
+        }
+
+        if (! $lang && method_exists($model, 'get_default_language')) {
+            $default = $model->get_default_language();
+            if ($default) {
+                $lang = $model->get_language($default);
+            }
+        }
+
+        if (is_object($lang) && isset($lang->slug)) {
+            $pll->curlang = $lang;
+            $GLOBALS['text_direction'] = (isset($lang->is_rtl) && $lang->is_rtl) ? 'rtl' : 'ltr';
+        }
+    }
+
+    protected static function maybeSetPolylangLanguageForAjax(): void
+    {
+        if (! function_exists('PLL')) {
+            return;
+        }
+
+        $pll = PLL();
+
+        if (class_exists(\PLL_REST_Request::class) && $pll instanceof \PLL_REST_Request) {
+            self::setPolylangCurlangFromModel($pll);
+
+            return;
+        }
+
+        if (class_exists(\PLL_Frontend::class) && $pll instanceof \PLL_Frontend) {
+            if (class_exists(\PLL_Choose_Lang_Url::class)) {
+                $choose_lang = new \PLL_Choose_Lang_Url($pll);
+                $lang = $choose_lang->get_preferred_language();
+
+                if (is_object($lang) && isset($lang->slug)) {
+                    $pll->curlang = $lang;
+                    $GLOBALS['text_direction'] = (isset($lang->is_rtl) && $lang->is_rtl) ? 'rtl' : 'ltr';
+                }
+            }
+
+            return;
+        }
+
+        self::setPolylangCurlangFromModel($pll);
+    }
+
     protected function handleRequest()
     {
         add_filter('wp_doing_ajax', '__return_true');
 
-        // Fix to set the current language in Polylang.
-        if (function_exists('PLL') && class_exists('PLL_Choose_Lang_Url')) {
-            $pll = PLL();
-            $choose_lang = new \PLL_Choose_Lang_Url($pll);
-            $lang = $choose_lang->get_preferred_language();
-
-            if (pll_current_language() != $lang) {
-                PLL()->curlang = $lang;
-                $GLOBALS['text_direction'] = PLL()->curlang->is_rtl ? 'rtl' : 'ltr';
-            }
-        }
+        self::maybeSetPolylangLanguageForAjax();
 
         do_action('tf/ajax/before', $this->action, $this->request);
         do_action('tf/ajax/before/action=' . $this->action, $this->action);
@@ -115,11 +204,34 @@ class Controller
 
         $result = $this->getHandlerData($this->action, $this->request->get_params());
 
+        if (is_wp_error($result)) {
+            return rest_ensure_response($result);
+        }
+
         if (is_array($result) || (is_object($result) && $result instanceof ArrayAccess)) {
             $template = $this->getTemplate();
 
             if (! empty($template)) {
-                $result = template($template, $result);
+                try {
+                    $result = template($template, $result);
+                } catch (\Throwable $e) {
+                    error_log(
+                        sprintf(
+                            'REST Ajax template: %s in %s:%d',
+                            $e->getMessage(),
+                            $e->getFile(),
+                            $e->getLine()
+                        )
+                    );
+
+                    return rest_ensure_response(
+                        new WP_Error(
+                            'rest_ajax_template',
+                            (defined('WP_DEBUG') && WP_DEBUG) ? $e->getMessage() : 'Template rendering failed.',
+                            ['status' => 500]
+                        )
+                    );
+                }
             }
         }
 
@@ -213,16 +325,19 @@ class Controller
             return false;
         }
 
-        if (! is_subclass_of(self::getActionClass($action), 'Triggerfish\REST_Ajax\AbstractAjaxHandler')) {
-            trigger_error(
-                sprintf(
-                    '%s must extend class Triggerfish\REST_Ajax\AbstractAjaxHandler.',
-                    self::getActionClass($action)
-                ),
-                E_USER_ERROR
-            );
-        }
+        if (! is_subclass_of($className, AbstractAjaxHandler::class)) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log(
+                    sprintf(
+                        '%s must extend class %s.',
+                        $className,
+                        AbstractAjaxHandler::class
+                    )
+                );
+            }
 
+            return false;
+        }
 
         return true;
     }
@@ -246,7 +361,7 @@ class Controller
         return false;
     }
 
-    protected function getCallabeHandler(): ?callable
+    protected function getCallableHandler(): ?callable
     {
 
         if (self::hasClassBasedHandler($this->action, $this->request)) {
@@ -260,6 +375,9 @@ class Controller
         return null;
     }
 
+    /** @var array<string, AbstractAjaxHandler> */
+    protected $actionClassInstances = [];
+
     protected function getActionClassInstance() : ?AbstractAjaxHandler
     {
 
@@ -267,25 +385,29 @@ class Controller
             return null;
         }
 
-        static $instance;
-
-        if (is_null($instance)) {
+        if (! isset($this->actionClassInstances[$this->action])) {
             $class = self::getActionClass($this->action);
-            $instance = new $class($this->request);
+            $this->actionClassInstances[$this->action] = new $class($this->request);
         }
 
-        return $instance;
+        return $this->actionClassInstances[$this->action];
     }
 
     protected function getHandlerData(string $action)
     {
+        $handler = $this->getCallableHandler();
+        if ($handler === null) {
+            return new WP_Error(
+                'no_handler',
+                'No handler found for this action.',
+                ['status' => 500]
+            );
+        }
+
         // Send all extra arguments to getHandlerData() onwards to the actual handler.
         $args = func_get_args();
         $extra_arguments = collect($args)->slice(1)->all();
 
-        return call_user_func_array(
-            $this->getCallabeHandler(),
-            $extra_arguments
-        );
+        return call_user_func_array($handler, $extra_arguments);
     }
 }

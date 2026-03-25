@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 /*
 Plugin Name:  REST Ajax
+Version:      1.2.0
 Author:       Triggerfish
 Author URI:   https://www.triggerfish.se/
 License:      MIT License
